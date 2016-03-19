@@ -6,21 +6,20 @@
 
 class Pilot ^=
 abstract
-	var id : nat;
-	var flyables : set of Aircraft;
-	var flights : set of Flight;
+	var 
+		id : nat,
+		flyables : set of Aircraft,
+		flights : set of Flight;
 	
 	invariant 
+		// Pilots must be able to fly at least one type of aircraft
 		#flyables > 0,
-		wooble(true);
+		// The set of flights for which the cardinality of the 
+		(for those x :: flights :- #(for those y :: flights :- y.date = x.date yield y) <= 2 yield x) = flights;
 		
 interface
-	function wooble (res:bool):bool
-		^= res;
-	// Add public access function, selector and method declarations here...
-	// ...
-	build{}
-		post ?;
+	build{!id:nat, !flyables: set of Aircraft}
+		post flights! = set of Flight{}
 end;
 
 // End

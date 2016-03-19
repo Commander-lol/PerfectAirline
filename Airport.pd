@@ -6,18 +6,22 @@
 
 class Airport ^=
 abstract
-	var name : string;
-	var code : string;
-	var inbound : set of Flight;
-	var outbound : set of Flight;
+	var 
+		name : string,
+		code : string,
+		flights : set of Flight;
 	
 	invariant #code = 3;
 	
 interface
-	// Add public access function, selector and method declarations here...
-	// ...
-	build{}
-		post ?;
+	build{!name:string, !code:string}
+		post flights! = set of Flight{};
+		
+	function inbound:set of Flight
+		^= for those f :: flights :- f.destination = self yield f;
+		
+	function outbound:set of Flight
+		^= for those f :: flights :- f.origin = self yield f;
 end;
 
 // End

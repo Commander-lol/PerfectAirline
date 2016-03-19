@@ -12,18 +12,24 @@ abstract
 	var origin : Airport;
 	var destination : Airport;
 	var passengers : set of Passenger;
-	var pilot : Pilot;
+	var pilots : set of Pilot;
 	var distance : nat;
 	
 	invariant 	
 		#code = 8,
+		#pilots > 1,
 		origin ~= destination,
 		#passengers <= aircraft.passengerLimit;
 interface
-	// Add public access function, selector and method declarations here...
-	// ...
 	build{}
 		post ?;
+		
+	function date;
+	function origin;
+	function destination;
+	
+	function isFull:bool
+		^= #passengers = aircraft.passengerLimit;
 end;
 
 // End
