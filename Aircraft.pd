@@ -6,12 +6,14 @@
 
 class Aircraft ^=
 abstract
-	var type : string;
-	var passengerLimit : nat;
+	var 
+		type : string,
+		passengerLimit : nat;
 interface
-	function passengerLimit;
-	build{}
-		post ?;
+	function 
+		type,
+		passengerLimit;
+	build{!type:string, !passengerLimit:nat};
 end;
 
 // End
