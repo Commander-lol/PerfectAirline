@@ -1,0 +1,26 @@
+//*******************************************************
+//* File:    C:/Users/Louis Capitanchik/Documents/RASS/Pilot.pd
+//* Author:  Pilot
+//* Created: 16:15:55 on Saturday March 19th 2016 UTC
+//*******************************************************
+
+class Pilot ^=
+abstract
+	var id : nat;
+	var flyables : set of Aircraft;
+	var flights : set of Flight;
+	
+	invariant 
+		#flyables > 0,
+		wooble(true);
+		
+interface
+	function wooble (res:bool):bool
+		^= res;
+	// Add public access function, selector and method declarations here...
+	// ...
+	build{}
+		post ?;
+end;
+
+// End

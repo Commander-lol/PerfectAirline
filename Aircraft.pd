@@ -1,0 +1,17 @@
+//*******************************************************
+//* File:    C:/Users/Louis Capitanchik/Documents/RASS/Aircraft.pd
+//* Author:  Aircraft
+//* Created: 16:14:32 on Saturday March 19th 2016 UTC
+//*******************************************************
+
+class Aircraft ^=
+abstract
+	var type : string;
+	var passengerLimit : nat;
+interface
+	function passengerLimit;
+	build{}
+		post ?;
+end;
+
+// End

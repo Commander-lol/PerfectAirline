@@ -1,0 +1,23 @@
+//*******************************************************
+//* File:    C:/Users/Louis Capitanchik/Documents/RASS/Airport.pd
+//* Author:  UP696771
+//* Created: 15:56:59 on Saturday March 19th 2016 UTC
+//*******************************************************
+
+class Airport ^=
+abstract
+	var name : string;
+	var code : string;
+	var inbound : set of Flight;
+	var outbound : set of Flight;
+	
+	invariant #code = 3;
+	
+interface
+	// Add public access function, selector and method declarations here...
+	// ...
+	build{}
+		post ?;
+end;
+
+// End

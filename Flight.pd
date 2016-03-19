@@ -1,0 +1,29 @@
+//*******************************************************
+//* File:    C:/Users/Louis Capitanchik/Documents/RASS/Flight.pd
+//* Author:  Flight
+//* Created: 16:05:25 on Saturday March 19th 2016 UTC
+//*******************************************************
+
+class Flight ^=
+abstract
+	var code : string;
+	var date : nat;
+	var aircraft : Aircraft;
+	var origin : Airport;
+	var destination : Airport;
+	var passengers : set of Passenger;
+	var pilot : Pilot;
+	var distance : nat;
+	
+	invariant 	
+		#code = 8,
+		origin ~= destination,
+		#passengers <= aircraft.passengerLimit;
+interface
+	// Add public access function, selector and method declarations here...
+	// ...
+	build{}
+		post ?;
+end;
+
+// End

@@ -1,0 +1,17 @@
+//*******************************************************
+//* File:    C:/Users/Louis Capitanchik/Documents/RASS/Passenger.pd
+//* Author:  Passenger
+//* Created: 16:18:31 on Saturday March 19th 2016 UTC
+//*******************************************************
+
+class Passenger ^=
+abstract
+	var passportID : string;
+interface
+	// Add public access function, selector and method declarations here...
+	// ...
+	build{}
+		post ?;
+end;
+
+// End

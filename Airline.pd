@@ -1,0 +1,20 @@
+//*******************************************************
+//* File:    C:/Users/Louis Capitanchik/Documents/RASS/Airline.pd
+//* Author:  Airline
+//* Created: 16:12:51 on Saturday March 19th 2016 UTC
+//*******************************************************
+
+class Airline ^=
+abstract
+	var name : string;
+	var aircraft : set of Aircraft;
+	var pilots : set of Pilot;
+	var schedule : set of Flight;
+interface
+	// Add public access function, selector and method declarations here...
+	// ...
+	build{}
+		post ?;
+end;
+
+// End
