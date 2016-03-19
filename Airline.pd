@@ -6,17 +6,18 @@
 
 class Airline ^=
 abstract
-	var name : string;
-	var aircraft : set of Aircraft;
-	var pilots : set of Pilot;
-	var schedule : set of Flight;
+	var 
+		name : string,
+		aircraft : set of Aircraft,
+		pilots : set of Pilot,
+		schedule : set of Flight;
 interface
-	build{}
-		post ?;
-		
 	schema !addFlight(flight : Flight)
 		pre flight ~in schedule
 		post schedule! = schedule.append(flight)
+		
+	build{}
+		post ?;
 end;
 
 // End

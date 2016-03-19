@@ -14,14 +14,14 @@ abstract
 	invariant #code = 3;
 	
 interface
-	build{!name:string, !code:string}
-		post flights! = set of Flight{};
-		
 	function inbound:set of Flight
 		^= for those f :: flights :- f.destination = self yield f;
 		
 	function outbound:set of Flight
 		^= for those f :: flights :- f.origin = self yield f;
+		
+	build{!name:string, !code:string}
+		post flights! = set of Flight{};
 end;
 
 // End

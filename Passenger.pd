@@ -8,10 +8,8 @@ class Passenger ^=
 abstract
 	var passportID : string;
 interface
-	// Add public access function, selector and method declarations here...
-	// ...
-	build{}
-		post ?;
+	function passportID;
+	build{!passportID:string};
 end;
 
 // End

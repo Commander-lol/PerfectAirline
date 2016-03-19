@@ -6,14 +6,15 @@
 
 class Flight ^=
 abstract
-	var code : string;
-	var date : nat;
-	var aircraft : Aircraft;
-	var origin : Airport;
-	var destination : Airport;
-	var passengers : set of Passenger;
-	var pilots : set of Pilot;
-	var distance : nat;
+	var 
+		code : string,
+		date : nat,
+		aircraft : Aircraft,
+		origin : Airport,
+		destination : Airport,
+		passengers : set of Passenger,
+		pilots : set of Pilot,
+		distance : nat;
 	
 	invariant 	
 		#code = 8,
@@ -21,15 +22,16 @@ abstract
 		origin ~= destination,
 		#passengers <= aircraft.passengerLimit;
 interface
-	build{}
-		post ?;
-		
-	function date;
-	function origin;
-	function destination;
+	function 
+		date,
+		origin,
+		destination;
 	
 	function isFull:bool
 		^= #passengers = aircraft.passengerLimit;
+		
+	build{}
+		post ?;
 end;
 
 // End
