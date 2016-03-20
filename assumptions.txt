@@ -1,0 +1,13 @@
+[ Airline ]
+* Airlines reasonably need at least one type of aircraft
+* An Airline can have an empty schedule
+* Airlines need a minimum of two pilots otherwise they cannot have flights
+* Airlines are allowed to be named any string of arbitrary characters, including spaces and punctuation, to account for international companies
+
+[ Airport ]
+* Airports abide by international standards and have a three letter designation
+* Airports are allows to be named any string of arbitrary characters, including spaces and punctuation, to account for international locations
+
+[ Aircraft ]
+* Passenger limit is simply an integer number of passengers and does not need to account for passenger weight or luggage allowances that might limit the safe operating capacity of an aircraft
+* Aircraft used by commercial airlines have an ICAO D-8643 type identifier (see http://www.icao.int/publications/DOC8643/Pages/default.aspx)
