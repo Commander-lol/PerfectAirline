@@ -16,8 +16,9 @@ abstract
 		code : string,
 		date : nat,
 		aircraft : Aircraft,
-		origin : Airport,
-		destination : Airport,
+		route: pair of (Airport, Airport), // Origin / Destination
+		//origin : Airport,
+		//destination : Airport,
 		passengers : set of Passenger,
 		pilots : set of Pilot,
 		distance : nat;
@@ -25,9 +26,10 @@ abstract
 	invariant
 		#code = 8,
 		#pilots > 1,// ASSUMPTION: Standard real life operating procedure dictates at least two pilots on a plane (More depending on airline and flight duration)
-		origin ~= destination, // ASSUMPTION: No circular trips
+		route.x ~= route.y, // ASSUMPTION: No circular trips
 		#passengers <= aircraft.passengerLimit, // ASSUMPTION: Flight cannot be overbooked (Occasionally policy for major airlines to compensate for average 10% no-shows)
 		forall p :: pilots :- aircraft in p.flyables; // All Pilots need to be able to be able to fly the current type of aircraft
+		//NOTE: No need to check uniqueness of passengers as equality is based on all properties and passengers only contain one, therefore already handled by set
 interface
 	schema !addPassenger(passenger : Passenger)
 		pre 
@@ -39,18 +41,21 @@ interface
 	
 	function 
 		date,
-		origin,
-		destination,
+		code,
+		route,
 		distance;
 	
 	function isFull:bool
 		^= #passengers = aircraft.passengerLimit;
 		
-	build{!code:string, !date:nat, !aircraft:Aircraft, !origin:Airport, !destination:Airport, !pilots:set of Pilot, !distance:nat}
+	total operator ~~(other)
+		^= date~~other.date;
+		
+	build{!code:string, !date:nat, !aircraft:Aircraft, !route:pair of (Airport,Airport), !pilots:set of Pilot, !distance:nat}
 		pre
 			#code = 8,
 			#pilots > 1,
-			origin ~= destination,
+			route.x ~= route.y,
 			forall p :: pilots :- aircraft in p.flyables
 		post passengers! = set of Passenger{};
 end;

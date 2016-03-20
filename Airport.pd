@@ -18,10 +18,10 @@ abstract
 interface
 	function flights;
 	function inbound:set of Flight
-		^= those f :: flights :- f.destination = self;
+		^= those f :: flights :- f.route.y = self;
 		
 	function outbound:set of Flight
-		^= those f :: flights :- f.origin = self;
+		^= those f :: flights :- f.route.x = self;
 		
 	build{!name:string, !code:string}
 		pre #code = 3

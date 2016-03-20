@@ -4,6 +4,7 @@
 //* License: See /LICENSE
 //* For full list of assumptions, please see /assumptions.txt
 //*******************************************************
+import "Utils.pd";
 
 class Aircraft ^=
 abstract
@@ -13,11 +14,13 @@ abstract
 	
 	invariant
 		#type = 3 | #type = 4, // ICAO D-8643 Aircraft Type Designators are 3 or 4 letter universally unique identifiers
-		forall c :: type :- c in `a`..`z`++`A`..`Z`++`0`..`9`; // D-8643 codes are alphanumeric
+		isAlpha@Utils(type); // D-8643 codes are alphanumeric
+		
 interface
 	function 
 		type,
 		passengerLimit;
+		
 	build{!type:string, !passengerLimit:nat}
 		pre (#type = 3 | #type = 4) & (forall c :: type :- c in `a`..`z`++`A`..`Z`++`0`..`9`);
 end;

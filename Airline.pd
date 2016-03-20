@@ -19,7 +19,11 @@ abstract
 		
 	invariant
 		#aircraft > 0, // ASSUMPTION: Airlines reasonably need to have at least one type of aircraft
-		#pilots > 1; // Since flights need at least two pilots each, an airline cannot operate with fewer than 2 pilots
+		#pilots > 1, // Since flights need at least two pilots each, an airline cannot operate with fewer than 2 pilots
+		~(exists x::pilots, y::pilots :- x.id = y.id), // There does not exist a pair of different pilots that share an ID(Unique ID constraint)
+		~(exists x::schedule, y::schedule :- x.code = y.code), // Set guarentees unique object, not unique ID as per Spec
+		forall x::pilots, y::aircraft :- exists z::x.flyables :- z = y;
+
 interface
 	schema !addFlight(flight : Flight)
 		pre flight ~in schedule

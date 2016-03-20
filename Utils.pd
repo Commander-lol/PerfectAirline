@@ -1,0 +1,17 @@
+//*******************************************************
+//* File:    /Utils.pd
+//* Author:  UP696771
+//* License: See /LICENSE
+//* For full list of assumptions, please see /assumptions.txt
+//*******************************************************
+
+class Utils ^=
+	interface
+		nonmember function isAlpha(phrase:string):bool
+			^=(
+				[#phrase > 0]: forall c :: phrase :- c in `a`..`z`++`A`..`Z`++`0`..`9`,
+				[]: false
+			);
+end;
+
+// End

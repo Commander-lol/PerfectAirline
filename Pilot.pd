@@ -13,7 +13,10 @@ abstract
 	var 
 		id : nat,
 		flyables : set of Aircraft,
-		flights : set of Flight;
+		flights : seq of Flight;
+	
+	const dateranges : set of pair of (int, int) 
+		^= set of pair of (int, int){};
 	
 	invariant 
 		#flyables > 0, // Pilots must be able to fly at least one type of aircraft
@@ -22,10 +25,17 @@ abstract
 		(those x :: flights :- #(those y :: flights :- y.date = x.date) <= 2) = flights;
 		
 interface
+	schema! addFlight(flight:Flight)
+		pre 
+			flight ~in flights,
+			#(those x :: flights :- x.date = flight.date) < 2
+		post flights! = flights.append(flight);
+
 	function
 		id,
 		flyables,
 		flights;
 	build{!id:nat, !flyables: set of Aircraft}
-		post flights! = set of Flight{}
+		pre #flyables > 1
+		post flights! = seq of Flight{}
 end;
