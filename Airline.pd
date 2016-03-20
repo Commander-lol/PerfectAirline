@@ -26,8 +26,11 @@ abstract
 
 interface
 	schema !addFlight(flight : Flight)
-		pre flight ~in schedule
-		post schedule! = schedule.append(flight);
+		pre 
+			flight ~in schedule,
+			~(exists x::schedule :- x.code = flight.code)
+		post schedule! = schedule.append(flight)
+		assert flight in schedule';
 		
 	schema !removeFlight(flight : Flight)
 		pre flight in schedule
@@ -36,8 +39,11 @@ interface
 	function fullFlights:set of Flight
 		^= those f :: schedule :- f.isFull;
 	
-	build{!name:string}
-		post aircraft! = set of Aircraft{},
-			pilots! = set of Pilot{},
-			schedule! = set of Flight{};
+	build{!name:string, !aircraft:set of Aircraft, !pilots:set of Pilot}
+		pre
+			#aircraft > 0,
+			#pilots > 1,
+			~(exists x::pilots, y::pilots :- x.id = y.id),
+			forall x::pilots, y::aircraft :- exists z::x.flyables :- z = y
+		post schedule! = set of Flight{};
 end;

@@ -22,5 +22,5 @@ interface
 		passengerLimit;
 		
 	build{!type:string, !passengerLimit:nat}
-		pre (#type = 3 | #type = 4) & (forall c :: type :- c in `a`..`z`++`A`..`Z`++`0`..`9`);
+		pre (#type = 3 | #type = 4) & isAlpha@Utils(type);
 end;

@@ -9,16 +9,16 @@ import
 	"Airport.pd",
 	"Passenger.pd",
 	"Pilot.pd";
-	
+
+class Route ^= pair of (Airport, Airport); // Origin / Destination
+
 class Flight ^=
 abstract
 	var 
 		code : string,
 		date : nat,
 		aircraft : Aircraft,
-		route: pair of (Airport, Airport), // Origin / Destination
-		//origin : Airport,
-		//destination : Airport,
+		route: Route,
 		passengers : set of Passenger,
 		pilots : set of Pilot,
 		distance : nat;
@@ -28,34 +28,57 @@ abstract
 		#pilots > 1,// ASSUMPTION: Standard real life operating procedure dictates at least two pilots on a plane (More depending on airline and flight duration)
 		route.x ~= route.y, // ASSUMPTION: No circular trips
 		#passengers <= aircraft.passengerLimit, // ASSUMPTION: Flight cannot be overbooked (Occasionally policy for major airlines to compensate for average 10% no-shows)
-		forall p :: pilots :- aircraft in p.flyables; // All Pilots need to be able to be able to fly the current type of aircraft
+		forall p :: pilots :- aircraft in p.flyables, // All Pilots need to be able to be able to fly the current type of aircraft
+		~(exists x::pilots, y::pilots :- x.id = y.id); // Enforce no two pilots with the same ID on the flight, implies data entry error since they must have different properties
 		//NOTE: No need to check uniqueness of passengers as equality is based on all properties and passengers only contain one, therefore already handled by set
 interface
 	schema !addPassenger(passenger : Passenger)
 		pre 
 			passenger ~in passengers,
 			~self.isFull
-		post passengers! = passengers.append(passenger);
+		post passengers! = passengers.append(passenger)
+		assert passenger in passengers';
 		
 	//Specification lists no required functionality for removing a passenger
+	
+	schema !addPilot(pilot : Pilot)
+		pre
+			pilot ~in pilots,
+			~(exists x::pilots :- x.id = pilot.id)
+		post pilots! = pilots.append(pilot)
+		assert 
+			pilot in pilots',
+			~(exists x::pilots', y::pilots' :- x.id = y.id);
 	
 	function 
 		date,
 		code,
 		route,
-		distance;
+		distance,
+		aircraft,
+		pilots;
+	
+	function origin:Airport
+		^= route.x;
+		
+	function destination:Airport
+		^= route.y;
+	
+	function amountOnFlight:nat
+		^= #passengers;
 	
 	function isFull:bool
 		^= #passengers = aircraft.passengerLimit;
 		
-	total operator ~~(other)
+	operator ~~(other)
 		^= date~~other.date;
 		
-	build{!code:string, !date:nat, !aircraft:Aircraft, !route:pair of (Airport,Airport), !pilots:set of Pilot, !distance:nat}
+	build{!code:string, !date:nat, !aircraft:Aircraft, !route:Route, !pilots:set of Pilot, !distance:nat}
 		pre
 			#code = 8,
 			#pilots > 1,
 			route.x ~= route.y,
-			forall p :: pilots :- aircraft in p.flyables
+			forall p :: pilots :- aircraft in p.flyables,
+			~(exists x::pilots, y::pilots :- x.id = y.id)
 		post passengers! = set of Passenger{};
 end;

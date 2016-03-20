@@ -22,19 +22,30 @@ abstract
 		#flyables > 0, // Pilots must be able to fly at least one type of aircraft
 		// The set of flights for which its date matches less than two other unique (lte when inclusive of self) 
 		// flights must match the set of flights (i.e. All flights must match constraint)
-		(those x :: flights :- #(those y :: flights :- y.date = x.date) <= 2) = flights;
+		(those x :: flights :- #(those y :: flights :- y.date = x.date) <= 2) = flights,
+		forall x::flights :- x.aircraft in flyables; // Pilot must be able to fly the aircraft on all of their flights
+		
 		
 interface
 	schema! addFlight(flight:Flight)
 		pre 
 			flight ~in flights,
-			#(those x :: flights :- x.date = flight.date) < 2
+			#(those x :: flights :- x.date = flight.date) < 2,
+			flight.aircraft in flyables
 		post flights! = flights.append(flight);
+	
+	schema! removeFlight(flight:Flight)
+		pre
+			flight in flights,
+			#flight.pilots > 2 // don't leave a flight with too few pilots
+		post
+			?;//flights! = flights.remove(flight);
 
 	function
 		id,
 		flyables,
 		flights;
+		
 	build{!id:nat, !flyables: set of Aircraft}
 		pre #flyables > 1
 		post flights! = seq of Flight{}

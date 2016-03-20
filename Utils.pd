@@ -7,11 +7,10 @@
 
 class Utils ^=
 	interface
+		//Check if string is alphanumeric
 		nonmember function isAlpha(phrase:string):bool
 			^=(
 				[#phrase > 0]: forall c :: phrase :- c in `a`..`z`++`A`..`Z`++`0`..`9`,
-				[]: false
+				[]: false // forall returns true for empty sets, but that isn't valid for alphanumeric strings
 			);
 end;
-
-// End

@@ -13,7 +13,9 @@ abstract
 		code : string,
 		flights : set of Flight;
 	
-	invariant #code = 3; // International convention for each airport to have three letter code
+	invariant 
+		#code = 3, // International convention for each airport to have three letter code
+		~(exists x::flights, y::flights :- x.code = y.code);
 	
 interface
 	function flights;
