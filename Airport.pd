@@ -2,7 +2,9 @@
 //* File:    /Airport.pd
 //* Author:  UP696771
 //* License: See /LICENSE
+//* For full list of assumptions, please see /assumptions.txt
 //*******************************************************
+import "Flight.pd";
 
 class Airport ^=
 abstract
@@ -11,17 +13,17 @@ abstract
 		code : string,
 		flights : set of Flight;
 	
-	invariant #code = 3;
+	invariant #code = 3; // International convention for each airport to have three letter code
 	
 interface
+	function flights;
 	function inbound:set of Flight
-		^= for those f :: flights :- f.destination = self yield f;
+		^= those f :: flights :- f.destination = self;
 		
 	function outbound:set of Flight
-		^= for those f :: flights :- f.origin = self yield f;
+		^= those f :: flights :- f.origin = self;
 		
 	build{!name:string, !code:string}
+		pre #code = 3
 		post flights! = set of Flight{};
 end;
-
-// End

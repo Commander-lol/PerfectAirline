@@ -2,6 +2,7 @@
 //* File:    /Passenger.pd
 //* Author:  UP696771
 //* License: See /LICENSE
+//* For full list of assumptions, please see /assumptions.txt
 //*******************************************************
 
 class Passenger ^=
@@ -11,5 +12,3 @@ interface
 	function passportID;
 	build{!passportID:string};
 end;
-
-// End

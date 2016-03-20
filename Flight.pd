@@ -2,8 +2,14 @@
 //* File:    /Flight.pd
 //* Author:  UP696771
 //* License: See /LICENSE
+//* For full list of assumptions, please see /assumptions.txt
 //*******************************************************
-
+import 
+	"Aircraft.pd",
+	"Airport.pd",
+	"Passenger.pd",
+	"Pilot.pd";
+	
 class Flight ^=
 abstract
 	var 
@@ -16,22 +22,35 @@ abstract
 		pilots : set of Pilot,
 		distance : nat;
 	
-	invariant 	
+	invariant
 		#code = 8,
-		#pilots > 1,
-		origin ~= destination,
-		#passengers <= aircraft.passengerLimit;
+		#pilots > 1,// ASSUMPTION: Standard real life operating procedure dictates at least two pilots on a plane (More depending on airline and flight duration)
+		origin ~= destination, // ASSUMPTION: No circular trips
+		#passengers <= aircraft.passengerLimit, // ASSUMPTION: Flight cannot be overbooked (Occasionally policy for major airlines to compensate for average 10% no-shows)
+		forall p :: pilots :- aircraft in p.flyables; // All Pilots need to be able to be able to fly the current type of aircraft
 interface
+	schema !addPassenger(passenger : Passenger)
+		pre 
+			passenger ~in passengers,
+			~self.isFull
+		post passengers! = passengers.append(passenger);
+		
+	//Specification lists no required functionality for removing a passenger
+	
 	function 
 		date,
 		origin,
-		destination;
+		destination,
+		distance;
 	
 	function isFull:bool
 		^= #passengers = aircraft.passengerLimit;
 		
-	build{}
-		post ?;
+	build{!code:string, !date:nat, !aircraft:Aircraft, !origin:Airport, !destination:Airport, !pilots:set of Pilot, !distance:nat}
+		pre
+			#code = 8,
+			#pilots > 1,
+			origin ~= destination,
+			forall p :: pilots :- aircraft in p.flyables
+		post passengers! = set of Passenger{};
 end;
-
-// End
