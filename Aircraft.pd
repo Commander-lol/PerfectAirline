@@ -1,7 +1,8 @@
 //*******************************************************
-//* File:    C:/Users/ljcap/Voidspace/Projects/RassPv2/Aircraft.pd
+//* File:    /Aircraft.pd
 //* Author:  UP696771
-//* Created: 20:42:15 on Sunday March 20th 2016 UTC
+//* License: See /License.txt
+//* Assumptions: See /Assumptions.txt
 //*******************************************************
 
 class Aircraft ^=

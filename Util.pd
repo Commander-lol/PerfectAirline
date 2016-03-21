@@ -1,7 +1,8 @@
 //*******************************************************
-//* File:    C:/Users/ljcap/Voidspace/Projects/RassPv2/Util.pd
+//* File:    /Util.pd
 //* Author:  UP696771
-//* Created: 20:44:41 on Sunday March 20th 2016 UTC
+//* License: See /License.txt
+//* Assumptions: See /Assumptions.txt
 //*******************************************************
 
 class Util ^=

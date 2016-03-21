@@ -1,7 +1,8 @@
 //*******************************************************
-//* File:    C:/Users/ljcap/Voidspace/Projects/RassPv2/Passenger.pd
+//* File:    /Passenger.pd
 //* Author:  UP696771
-//* Created: 22:40:44 on Sunday March 20th 2016 UTC
+//* License: See /License.txt
+//* Assumptions: See /Assumptions.txt
 //*******************************************************
 
 class Passenger ^=
