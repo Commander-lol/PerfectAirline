@@ -16,4 +16,4 @@ end;
 
 class Route ^= pair of (Airport, Airport);
 
-class Date ^= those x:nat :- x <= 365;
+class Date ^= those x:nat :- 1 <= x <= 365;

@@ -4,13 +4,12 @@
 //* License: See /License.txt
 //* Assumptions: See /Assumptions.txt
 //*******************************************************
+class AirportCode ^= those s:string :- (#s = 3) & (forall c::s :- c in `A`..`Z`);
 
 class Airport ^=
 abstract
-	var code:string;
-	invariant #code = 3; // Standard three character airport identifier
+	var code:AirportCode;
 interface
 	function code;
-	build{!code:string}
-		pre #code = 3;
+	build{!code:AirportCode}
 end;

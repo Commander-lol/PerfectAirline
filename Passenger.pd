@@ -19,5 +19,3 @@ interface
 			Util isAlpha(uid),
 			#uid = 6;
 end;
-
-// End

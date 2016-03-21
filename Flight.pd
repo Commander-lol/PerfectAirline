@@ -13,24 +13,17 @@ abstract
 		route : Route,
 		pilot: Pilot || void,
 		passengers : set of Passenger,
-		distance: nat;
+		distance: nat; // ASSUMPTION: Flight in whole number of miles
 		
 	invariant
 		#code = 8, // ASSUMPTION: "8 character flight code" means any string character is valid
-		route.x ~= route.y, // No circular routes
+		route.x ~= route.y, // ASSUMPTION: No circular routes
 		(
 			[pilot ~= null]: aircraft in (pilot is Pilot).flyables,
 			[]: true
 		),
 		~(exists x::passengers, y::passengers :- x~=y & x.uid = y.uid), // ASSUMPTION: Airline only allows people to buy one ticket/flight
 		#passengers <= aircraft.capacity;
-		
-confined
-	build{!code:string, !date:Date, !distance:nat, !aircraft:Aircraft, !pilot:Pilot||void, !route:Route, !passengers:set of Passenger}
-		pre
-			#code = 8,
-			route.x ~= route.y,
-			~(exists x::passengers, y::passengers :- x~=y & x.uid = y.uid);
 interface
 
 	schema! addPassenger(passenger:Passenger)
@@ -57,18 +50,25 @@ interface
 		distance,
 		passengers;
 		
+	function origin:Airport
+		^= route.x;
+		
+	function destination:Airport
+		^= route.y;
+		
 	function numOfPassengers:nat
 		^= #passengers;
 	
 	function isFull:bool
 		^= #passengers = aircraft.capacity;
 		
-	operator ~~ (other)
-		^= date ~~ other.date;
-		
 	build{!code:string, !date:Date, !distance: nat, !aircraft:Aircraft, !pilot:Pilot||void, !route:Route}
 		pre
 			#code = 8,
-			route.x ~= route.y
+			route.x ~= route.y,
+			(
+				[pilot ~= null]: aircraft in (pilot is Pilot).flyables,
+				[]: true
+			)
 		post passengers! = set of Passenger{};
 end;
