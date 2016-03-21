@@ -91,7 +91,9 @@ interface
 	schema! removePilotFromFlight(fcode:string)
 		pre fcode in flights.dom
 		post flights[fcode]!setPilot(null)
-		assert fcode ~in flights'.dom;
+		assert 
+			fcode in flights'.dom,
+			flights'[fcode].pilot = null;
 
 	function pilotsFlights(pilot:Pilot): set of Flight
 		^= those f::flights.ran :- f.pilot = pilot;
