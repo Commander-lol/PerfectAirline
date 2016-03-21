@@ -1,0 +1,22 @@
+//*******************************************************
+//* File:    C:/Users/ljcap/Voidspace/Projects/RassPv2/Passenger.pd
+//* Author:  UP696771
+//* Created: 22:40:44 on Sunday March 20th 2016 UTC
+//*******************************************************
+
+class Passenger ^=
+abstract
+	var uid: string;
+	invariant
+		// Each passenger is identified with a 6 character alphanumeric id, allowing 56bn unique people
+		Util isAlpha(uid),
+		#uid = 6; 
+interface
+	function uid;	
+	build{!uid:string}
+		pre 
+			Util isAlpha(uid),
+			#uid = 6;
+end;
+
+// End

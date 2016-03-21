@@ -1,0 +1,24 @@
+//*******************************************************
+//* File:    C:/Users/ljcap/Voidspace/Projects/RassPv2/Aircraft.pd
+//* Author:  UP696771
+//* Created: 20:42:15 on Sunday March 20th 2016 UTC
+//*******************************************************
+
+class Aircraft ^=
+abstract
+	var
+		type : string,
+		capacity : nat;
+	invariant
+		#type = 3 | #type = 4, // ICAO D-8643 Aircraft Type Designators are 3 or 4 letter universally unique identifiers
+		Util isAlpha(type); // D-8643 codes are alphanumeric
+interface
+	function
+		type,
+		capacity;
+		
+	build{!type:string, !capacity:nat}
+		pre
+			#type = 3,
+			Util isAlpha(type);
+end;

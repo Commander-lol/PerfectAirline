@@ -1,0 +1,55 @@
+//*******************************************************
+//* File:    C:/Users/ljcap/Voidspace/Projects/RassPv2/Flight.pd
+//* Author:  UP696771
+//* Created: 20:42:20 on Sunday March 20th 2016 UTC
+//*******************************************************
+class Flight ^=
+abstract
+	var
+		code : string,
+		date : Date,
+		aircraft : Aircraft,
+		route : Route,
+		pilot: Pilot || void,
+		passengers : set of Passenger;
+		
+	invariant
+		#code = 8, // ASSUMPTION: "8 character flight code" means any string character is valid
+		route.x ~= route.y, // No circular routes
+		~(exists x::passengers, y::passengers :- x.uid = y.uid); // ASSUMPTION: Airline only allows people to buy one ticket/flight
+		
+interface
+
+	function
+		code,
+		date,
+		aircraft,
+		route,
+		pilot,
+		passengers;
+		
+	function numOfPassengers:nat
+		^= #passengers;
+		
+	function distance:nat
+		^= (
+			let origin^=route.x.location;
+			let destination^=route.y.location;
+			[origin > destination]: origin - destination,
+			[origin < destination]: destination - origin,
+			[]: 0
+		);
+	
+	function isFull:bool
+		^= #passengers = aircraft.capacity;
+	operator ~~ (other)
+		^= date ~~ other.date;
+		
+	build{!code:string, !date:Date, !aircraft:Aircraft, !pilot:Pilot||void, !route:Route}
+		pre
+			#code = 8,
+			route.x ~= route.y
+		post passengers! = set of Passenger{};
+end;
+
+// End

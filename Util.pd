@@ -1,0 +1,18 @@
+//*******************************************************
+//* File:    C:/Users/ljcap/Voidspace/Projects/RassPv2/Util.pd
+//* Author:  UP696771
+//* Created: 20:44:41 on Sunday March 20th 2016 UTC
+//*******************************************************
+
+class Util ^=
+interface
+	nonmember function isAlpha(phrase:string):bool
+		^= (
+			[#phrase > 0]: forall c::phrase :- c in (`a`..`z`++`A`..`Z`++`0`..`9`),
+			[]: false
+		);
+end;
+
+class Route ^= pair of (Airport, Airport);
+
+class Date ^= those x:nat :- x <= 365;

@@ -1,0 +1,25 @@
+//*******************************************************
+//* File:    /Pilot.pd
+//* Author:  UP696771
+//* License: See /License.txt
+//* Assumptions: See /Assumptions.txt
+//*******************************************************
+
+class Pilot ^=
+abstract
+	var 
+		id : string,
+		flyables : set of Aircraft;
+	invariant
+		#flyables > 0, // ASSUMPTION: Pilots must be able to fly at least one type of plane
+		Util isAlpha(id); // ASSUMPTION: IDs are alphanumeric strings
+interface
+	function
+		id,
+		flyables;
+	build{!id:string, !flyables:set of Aircraft}
+		pre
+			#flyables > 0,
+			Util isAlpha(id);
+			
+end;
