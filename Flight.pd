@@ -24,10 +24,27 @@ abstract
 		),
 		~(exists x::passengers, y::passengers :- x~=y & x.uid = y.uid), // ASSUMPTION: Airline only allows people to buy one ticket/flight
 		#passengers <= aircraft.capacity;
+		
+		
+	const 
+		das ^= Aircraft{"das", 300},
+		dsa:Aircraft ^= Aircraft{"dsa", 250},
+		
+		
+		lax ^= Airport{"LAX"},
+		edn ^= Airport{"EDN"},
+		
+		frank ^= Pilot{"FrankyBoi", set of Aircraft{das, dsa}},
+		
+		franksFirstFlight ^= Flight{"abababab", 123, 1200, dsa, frank, Route{lax, edn}};
+		
 interface
+	property assert (self after it!setPilot(null)).pilot = null;
+	//property assert (self after it!setPilot(frank)).pilot = frank; 
 
 	schema! addPassenger(passenger:Passenger)
 		pre 
+			passenger ~in passengers,
 			~(exists x::passengers :- x~=passenger & x.uid = passenger.uid),
 			~isFull
 		post passengers! = passengers.append(passenger)

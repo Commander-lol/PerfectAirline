@@ -21,5 +21,4 @@ interface
 		pre
 			#flyables > 0,
 			Util isAlpha(id);
-			
 end;

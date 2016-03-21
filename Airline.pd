@@ -36,13 +36,13 @@ interface
 				[flight.pilot ~= null]: (
 					let pilot ^= (flight.pilot is Pilot);
 					pilot in pilots &
-					flight.aircraft in pilot.flyables
+					flight.aircraft in pilot.flyables & (
+						let pflights ^= pilotsFlightsAsBag(pilot).append(flight);
+						let dates ^= for f::pflights yield f.date;
+						forall date::dates :- date#dates <= 2
+					)
 				),
-					//& (
-						//let pflights ^= pilotsFlightsAsBag(pilot).append(flight);
-						//let dates ^= for f::pflights yield f.date;
-						//forall date::dates :- date#dates <= 2
-					//)
+					
 				//),
 				[]: true
 			)
@@ -57,8 +57,7 @@ interface
 			(	let flight ^= flights[code];
 				[flight.pilot ~= null]: (
 					let pilot ^= (flight.pilot is Pilot);
-					pilot in pilots &
-					flight.aircraft in pilot.flyables
+					pilot in pilots
 				),
 				[]: true
 			)
@@ -69,7 +68,8 @@ interface
 	schema! addPassenger(fcode:string, passenger:Passenger)
 		pre 
 			fcode in flights.dom,
-			~flights[fcode].isFull
+			~flights[fcode].isFull,
+			passenger ~in flights[fcode].passengers
 		post flights[fcode]!addPassenger(passenger)
 		assert 
 			fcode in flights'.dom,
@@ -82,11 +82,14 @@ interface
 			flights[fcode].aircraft in pilot.flyables,
 			(
 				let flight ^= flights[fcode];
-				let pflights ^= pilotsFlights(pilot).append(flight);
-				//flight.aircraft in pilot.flyables,
-				(those x::pflights :- #(those y::pflights :- x=y | x.date = y.date) <= 2) = pflights
+				let pflights ^= pilotsFlightsAsBag(pilot);
+				let dates ^= for f::pflights yield f.date;
+				forall date::dates :- date#dates <= 2
 			)
-		post flights[fcode]!setPilot(pilot);
+		post flights[fcode]!setPilot(pilot)
+		assert 
+			fcode in flights'.dom,
+			flights'[fcode].pilot = pilot;
 
 	schema! removePilotFromFlight(fcode:string)
 		pre fcode in flights.dom
