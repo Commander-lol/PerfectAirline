@@ -11,3 +11,4 @@
 [ Aircraft ]
 * Passenger limit is simply an integer number of passengers and does not need to account for passenger weight or luggage allowances that might limit the safe operating capacity of an aircraft
 * Aircraft used by commercial airlines have an ICAO D-8643 type identifier (see http://www.icao.int/publications/DOC8643/Pages/default.aspx)
+
