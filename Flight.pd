@@ -12,14 +12,41 @@ abstract
 		aircraft : Aircraft,
 		route : Route,
 		pilot: Pilot || void,
-		passengers : set of Passenger;
+		passengers : set of Passenger,
+		distance: nat;
 		
 	invariant
 		#code = 8, // ASSUMPTION: "8 character flight code" means any string character is valid
 		route.x ~= route.y, // No circular routes
-		~(exists x::passengers, y::passengers :- x.uid = y.uid); // ASSUMPTION: Airline only allows people to buy one ticket/flight
+		(
+			[pilot ~= null]: aircraft in (pilot is Pilot).flyables,
+			[]: true
+		),
+		~(exists x::passengers, y::passengers :- x~=y & x.uid = y.uid), // ASSUMPTION: Airline only allows people to buy one ticket/flight
+		#passengers <= aircraft.capacity;
 		
+confined
+	build{!code:string, !date:Date, !distance:nat, !aircraft:Aircraft, !pilot:Pilot||void, !route:Route, !passengers:set of Passenger}
+		pre
+			#code = 8,
+			route.x ~= route.y,
+			~(exists x::passengers, y::passengers :- x~=y & x.uid = y.uid);
 interface
+
+	schema! addPassenger(passenger:Passenger)
+		pre 
+			~(exists x::passengers :- x~=passenger & x.uid = passenger.uid),
+			~isFull
+		post passengers! = passengers.append(passenger)
+		assert passenger in passengers';
+
+	schema! setPilot(newPilot:Pilot || void)
+		pre (
+			[newPilot ~= null]: aircraft in (newPilot is Pilot).flyables,
+			[]: true
+		)
+		post pilot! = newPilot
+		assert pilot' = newPilot;
 
 	function
 		code,
@@ -27,30 +54,21 @@ interface
 		aircraft,
 		route,
 		pilot,
+		distance,
 		passengers;
 		
 	function numOfPassengers:nat
 		^= #passengers;
-		
-	function distance:nat
-		^= (
-			let origin^=route.x.location;
-			let destination^=route.y.location;
-			[origin > destination]: origin - destination,
-			[origin < destination]: destination - origin,
-			[]: 0
-		);
 	
 	function isFull:bool
 		^= #passengers = aircraft.capacity;
+		
 	operator ~~ (other)
 		^= date ~~ other.date;
 		
-	build{!code:string, !date:Date, !aircraft:Aircraft, !pilot:Pilot||void, !route:Route}
+	build{!code:string, !date:Date, !distance: nat, !aircraft:Aircraft, !pilot:Pilot||void, !route:Route}
 		pre
 			#code = 8,
 			route.x ~= route.y
 		post passengers! = set of Passenger{};
 end;
-
-// End

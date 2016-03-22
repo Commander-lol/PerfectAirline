@@ -7,20 +7,10 @@
 
 class Airport ^=
 abstract
-	var
-		code:string,
-		location:nat;
-		//**************************************************************
-		//* ASSUMPTION: Location is stored as a one dimensional distance
-		//* from an internationally agreed upon zero point, allowing use
-		//* of vector maths for working out distance
-		//**************************************************************
-	invariant
-		#code = 3; // Standard three character airport identifier
+	var code:string;
+	invariant #code = 3; // Standard three character airport identifier
 interface
-	function
-		code,
-		location;
-	build{!code:string, !location:nat}
+	function code;
+	build{!code:string}
 		pre #code = 3;
 end;

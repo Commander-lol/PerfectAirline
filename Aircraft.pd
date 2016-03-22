@@ -20,6 +20,6 @@ interface
 		
 	build{!type:string, !capacity:nat}
 		pre
-			#type = 3,
+			#type = 3 | #type = 4,
 			Util isAlpha(type);
 end;

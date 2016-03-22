@@ -9,59 +9,124 @@ class Airline ^=
 abstract
 	var
 		pilots : set of Pilot,
-		flights : seq of Flight,
+		flights : map of (string -> Flight),
 		aircraft : set of Aircraft;
 		
 	invariant
 		#aircraft > 0, // ASSUMPTION: Airlines need at least one aircraft to operate
 		#pilots > 0, // ASSUMPTION: Airlines need at least one pilot to operate
 		forall p::pilots :- exists a::aircraft :- a in p.flyables, // ASSUMPTION: A pilot cannot work for an airline without being able to fly at least one of its plane types
-		forall f::flights :- f.aircraft in aircraft,
-		
-		// No two (different) flights may share the same code
-		forall f::flights :- forall o::flights :- (
-			[f = o]: true,
-			[]: f.code ~= o.code
+		forall f::flights.ran :- f.aircraft in aircraft,
+		forall p::pilots :- ( //Pilots are only allowed to fly twice per unique date
+			let pflights ^= those f::flights.ran :- f.pilot = p;
+			(those x::pflights :- #(those y::pflights :- x=y | x.date = y.date) <= 2) = pflights
 		),
-		
-		forall p::pilots :- (
-			let pflights ^= those f::flights :- f.pilot = p;
-			(those x::pflights :- #(those y::pflights :- x.date = y.date) <= 2) = pflights
+		forall p::pilots :- (													// For every pilot
+			let pflights ^= those f::flights.ran :- f.pilot = p;				
+			forall f::pflights :- (												// For each of their flights
+				let fdist ^= for those x::pflights :- exists prev::0..4 :- (	// Let fdist be the set of the distances of those flights
+					let next ^= 4 - prev;										
+					x.date >= f.date-prev | x.date <= f.date+next				// that make up a 5 day window around the given flight
+				) yield x.distance;
+				[#fdist > 1]: (+ over fdist) <= 25000,							// If there is at least one flight in the window, ensure total distance is less than 25k
+				[]: true														// Otherwise true, since no flights is a total distance less than 25k
+			)
 		);
 interface
+
 	schema! addFlight(flight:Flight)
+//		pre
+//			([flight.code in flights.dom]: flights[flight.code] = flight | ~(flight.code in flights.dom),[]:true),
+//			//flights[flight.code] = flight | ~(flight.code in flights.dom),
+//			(
+//				[flight.pilot = null]: true,
+//				[]: 
+//					(flight.pilot is Pilot) in pilots & // Pilot exists in airline
+//					(
+//						let fp ^= (flight.pilot is Pilot); // Check that adding flight will not conflict with health and safety laws (1)
+//						let pflights ^= (those f::flights.remove(flight.code).append(flight.code -> flight).ran :- f.pilot = fp);
+//						forall f::pflights :- #(those y::pflights :- f.date = y.date) <= 2 &
+//						(
+//							forall pf::pflights :- (
+//								let fdist ^= for those x::pflights :- exists prev::0..4 :- (
+//									let next ^= 4 - prev;
+//									x.date >= pf.date-prev | x.date <= pf.date+next
+//								) yield x.distance;
+//								[#fdist > 1]: (+ over fdist) <= 25000,
+//								[]: true
+//							)
+//						)
+//					)
+//			)
+		post flights! = flights.append(flight.code -> flight);
+//		assert 
+//			flight.code in flights'.dom,
+//			flight in flights'.ran,
+///			#flights' = #flights + 1;
+	schema! removeFlight(code:string)
 		pre
-			flight ~in flights,
+			code in flights.dom
+//			forall flight::flights.ran :- (
+//					[flight.pilot = null]: true,
+//					[]: 
+//						(flight.pilot is Pilot) in pilots & // Pilot exists in airline
+//						(
+//							let fp ^= (flight.pilot is Pilot); // Check that adding flight will not conflict with health and safety laws (1)
+//							let pflights ^= (those f::flights.ran :- f.pilot = fp);
+//							(those x::pflights :- #(those y::pflights :- x.date = y.date) <= 2) = pflights &
+//							(
+//								forall pf::pflights :- (
+//									let fdist ^= for those x::pflights :- exists prev::0..4 :- (
+//										let next ^= 4 - prev;
+//										x.date >= pf.date-prev | x.date <= pf.date+next
+//									) yield x.distance;
+//									[#fdist > 1]: (+ over fdist) <= 25000,
+//									[]: true
+//								)
+//							)
+//						)
+//				),
+//				forall x::flights[code].passengers :- (x = passenger) | ~(x.uid = passenger.uid)
+		post flights! = flights.remove(code)
+		assert code ~in flights'.dom;
+
+	schema! addPassenger(code:string, passenger:Passenger)
+		pre 
+			code in flights.dom
+			
+		post flights[code]!addPassenger(passenger)
+		assert passenger in flights'[code].passengers;
+
+	schema! assignPilotToFlight(fcode:string, pilot:Pilot)
+		pre
+			pilot in pilots,
 			(
-				[flight.pilot = null]: true,
-				[]: (flight.pilot is Pilot) in pilots
-			),
-			flight.aircraft in aircraft,
-			forall f::flights :- flight.code ~= f.code,
-			(
-				[flight.pilot = null]: true,
-				[]: (
-					let fp ^= (flight.pilot is Pilot);
-					let pflights ^= (those f::flights :- f.pilot = fp).append(flight);
-					(those x::pflights :- #(those y::pflights :- x.date = y.date) <= 2) = pflights
-				)
+				let flight ^= flights[fcode];
+				let pflights ^= pilotsFlights(pilot).append(flight);
+				//flight.aircraft in pilot.flyables,
+				(those x::pflights :- #(those y::pflights :- x=y | x.date = y.date) <= 2) = pflights
 			)
-		post flights! = flights.append(flight)
-		assert flight in flights';
+		post flights[fcode]!setPilot(pilot);
 
-	function flightsToAirport(airport:Airport): seq of Flight
-		^= those f::flights :- f.route.y = airport;
+	schema! removePilotFromFlight(fcode:string)
+		post flights[fcode]!setPilot(null);
 
-	function flightsFromAirport(airport:Airport): seq of Flight
-		^= those f::flights :- f.route.x = airport;
+	function pilotsFlights(pilot:Pilot): set of Flight
+		^= those f::flights.ran :- f.pilot = pilot;
+
+	function fullFlights:set of Flight
+		^= those f::flights.ran :- f.isFull;
 		
-	function fullFlights:seq of Flight
-		^= those f::flights :- f.isFull;
+	function flightsToAirport(airport:Airport): set of Flight
+		^= those f::flights.ran :- f.route.y = airport;
+
+	function flightsFromAirport(airport:Airport): set of Flight
+		^= those f::flights.ran :- f.route.x = airport;
 		
 	build{!pilots:set of Pilot, !aircraft:set of Aircraft}
 		pre
 			#aircraft > 0,
 			#pilots > 0,
 			forall p::pilots :- exists a::aircraft :- a in p.flyables
-		post flights! = seq of Flight{};
+		post flights! = map of (string -> Flight){};
 end;
