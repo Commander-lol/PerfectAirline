@@ -10,8 +10,8 @@ abstract
 	var uid: string;
 	invariant
 		// Each passenger is identified with a 6 character alphanumeric id, allowing 56bn unique people
-		Util isAlpha(uid),
-		#uid = 6; 
+		Util isAlpha(uid), // ASSUMPTION: IDs are unique alphanumeric strings
+		#uid = 6;
 interface
 	function uid;	
 	build{!uid:string}

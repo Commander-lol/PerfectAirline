@@ -26,22 +26,29 @@ abstract
 		#passengers <= aircraft.capacity;
 		
 		
-	const 
+	ghost const 
 		das ^= Aircraft{"das", 300},
-		dsa:Aircraft ^= Aircraft{"dsa", 250},
-		
+		dsa ^= Aircraft{"dsa", 250},
+		rsp ^= Aircraft{"rsp", 3},
 		
 		lax ^= Airport{"LAX"},
 		edn ^= Airport{"EDN"},
 		
-		frank ^= Pilot{"FrankyBoi", set of Aircraft{das, dsa}},
+		frank ^= Pilot{"FrankyBoi", set of Aircraft{das, dsa, rsp}},
+		basil ^= Pilot{"ItsBasilThyme", set of Aircraft{dsa}},
 		
-		franksFirstFlight ^= Flight{"abababab", 123, 1200, dsa, frank, Route{lax, edn}};
+		reallySmallFlight ^= Flight{"abababab", 123, 1200, rsp, frank, Route{lax, edn}},
+		franksGreatFlight ^= Flight{"babababa", 365, 2500, dsa, frank, Route{edn, lax}};
 		
 interface
+	ghost schema! fillFlight
+		pre aircraft.capacity - #passengers >= 3
+		post passengers! = passengers.append(Passenger{"1SD45B"}).append(Passenger{"1SD48J"}).append(Passenger{"1ST8MQ"});
+	
 	property assert (self after it!setPilot(null)).pilot = null;
-	//property assert (self after it!setPilot(frank)).pilot = frank; 
-
+	property assert (reallySmallFlight after it!fillFlight).isFull; 
+	property assert (franksGreatFlight after it!setPilot(basil)).pilot = basil;
+	
 	schema! addPassenger(passenger:Passenger)
 		pre 
 			passenger ~in passengers,

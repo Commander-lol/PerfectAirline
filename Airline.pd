@@ -17,10 +17,27 @@ abstract
 		#pilots > 0, // ASSUMPTION: Airlines need at least one pilot to operate
 		forall p::pilots :- exists a::aircraft :- a in p.flyables, // ASSUMPTION: A pilot cannot work for an airline without being able to fly at least one of its plane types
 		forall f::flights.ran :- f.aircraft in aircraft
+		
+// ***	Invariant for ensuring all no more than 2 flights per day per pilot, causes verification to take >5 minutes & will be unproved (though not refuted)
+// ***	See schemas that affect flights for a verified pre condition version
 //		forall p::pilots :- (
 //			let pflights ^= those f::flights.ranb :- f.pilot = p;
 //			let dates ^= for f::pflights yield f.date;
 //			forall date::dates :- date#dates <= 2
+//		)
+
+// ***	Invariant for ensuring no pilot flies more than 25k mi in any 5 day window, causes verification to take >5 minutes & will be unproved (though not refuted)
+// ***	See schemas that affect flights for a verified pre condition version
+//		forall p::pilots :- (
+//			let pflights ^= those f::flights.ran :- f.pilot = p;
+//			forall pf::pflights :- (
+//				let fdist ^= for those x::pflights :- exists prev::0..4 :- ( 	// Get every day from current to +/- 4 
+//					let next ^= 4 - prev;										// from current(e.g. 0/4, 1/3, 2/2, 3/1, 4/0)
+//					pf.date-prev <= x.date <= pf.date+next						// therefore 5 day window inc current day
+//				) yield x.distance;												// return its distance
+//				[#fdist > 1]: (+ over fdist) <= 25000,							// Sum bag of distances, ensure less than 25k
+//				[]: true														// Over doesn't work for empty bags, return true
+//			)
 //		)
 		
 confined
@@ -28,22 +45,32 @@ confined
 		^= those f::flights.ranb :- f.pilot = pilot;
 interface
 
-	schema! addFlight(flight:Flight)
+	function flights; // SPEC [1]
+
+	schema! addFlight(flight:Flight) // SPEC [2]
 		pre
 			flight.code ~in flights.dom,
 			flight.aircraft in aircraft,
 			(
 				[flight.pilot ~= null]: (
 					let pilot ^= (flight.pilot is Pilot);
-					pilot in pilots &
-					flight.aircraft in pilot.flyables & (
-						let pflights ^= pilotsFlightsAsBag(pilot).append(flight);
-						let dates ^= for f::pflights yield f.date;
-						forall date::dates :- date#dates <= 2
+					let pflights ^= those f::(flights.append(flight.code -> flight).ranb) :- f.pilot = pilot; // Ensure all proofs use the new set of flights
+					pilot in pilots & // Pilot must work for airline
+					flight.aircraft in pilot.flyables & ( // Pilot must be able to fly plane
+						let dates ^= for f::pflights yield f.date; // Get bag of all dates for one pilot's schedule
+						forall date::dates :- date#dates <= 2 // Dates can only exist up to two times, H&S
+					) &
+					(
+						forall pf::pflights :- (
+							let fdist ^= for those x::pflights :- exists prev::0..4 :- ( 	// Get every day from current to +/- 4 
+								let next ^= 4 - prev;										// from current(e.g. 0/4, 1/3, 2/2, 3/1, 4/0)
+								pf.date-prev <= x.date <= pf.date+next						// therefore 5 day window inc current day
+							) yield x.distance;												// return its distance
+							[#fdist > 1]: (+ over fdist) <= 25000,							// Sum bag of distances, ensure less than 25k
+							[]: true														// Over doesn't work for empty bags, return true
+						)
 					)
 				),
-					
-				//),
 				[]: true
 			)
 		post flights! = flights.append(flight.code -> flight)
@@ -51,7 +78,7 @@ interface
 			flight.code in flights'.dom,
 			flight in flights'.ran;
 			
-	schema! removeFlight(code:string)
+	schema! removeFlight(code:string) // SPEC [3]
 		pre
 			code in flights.dom,
 			(	let flight ^= flights[code];
@@ -65,7 +92,7 @@ interface
 		assert
 			code ~in flights'.dom;
 
-	schema! addPassenger(fcode:string, passenger:Passenger)
+	schema! addPassenger(fcode:string, passenger:Passenger) // SPEC [4]
 		pre 
 			fcode in flights.dom,
 			~flights[fcode].isFull,
@@ -75,39 +102,49 @@ interface
 			fcode in flights'.dom,
 			passenger in flights'[fcode].passengers;
 
-	schema! assignPilotToFlight(fcode:string, pilot:Pilot)
+	schema! assignPilotToFlight(fcode:string, pilot:Pilot) // SPEC [5.1]
 		pre
 			pilot in pilots,
 			fcode in flights.dom,
 			flights[fcode].aircraft in pilot.flyables,
 			(
 				let flight ^= flights[fcode];
-				let pflights ^= pilotsFlightsAsBag(pilot);
+				let pflights ^= (flights.ranb.append(flight)); // Add new flight to pilots flights, it isn't in the bag yet
 				let dates ^= for f::pflights yield f.date;
-				forall date::dates :- date#dates <= 2
+				forall date::dates :- date#dates <= 2 &
+				(
+					forall pf::pflights :- (
+						let fdist ^= for those x::pflights :- exists prev::0..4 :- (
+							let next ^= 4 - prev;
+							pf.date-prev <= x.date <= pf.date+next
+						) yield x.distance;
+						[#fdist > 1]: (+ over fdist) <= 25000,
+						[]: true
+					)
+				)
 			)
 		post flights[fcode]!setPilot(pilot)
 		assert 
 			fcode in flights'.dom,
 			flights'[fcode].pilot = pilot;
 
-	schema! removePilotFromFlight(fcode:string)
+	schema! removePilotFromFlight(fcode:string) // SPEC [5.2]
 		pre fcode in flights.dom
 		post flights[fcode]!setPilot(null)
 		assert 
 			fcode in flights'.dom,
 			flights'[fcode].pilot = null;
 
-	function pilotsFlights(pilot:Pilot): set of Flight
+	function pilotsFlights(pilot:Pilot): set of Flight // SPEC [6]
 		^= those f::flights.ran :- f.pilot = pilot;
 
-	function fullFlights:set of Flight
+	function fullFlights:set of Flight // SPEC [7]
 		^= those f::flights.ran :- f.isFull;
 		
-	function flightsToAirport(airport:Airport): set of Flight
+	function flightsToAirport(airport:Airport): set of Flight // SPEC [8]
 		^= those f::flights.ran :- f.route.y = airport;
 
-	function flightsFromAirport(airport:Airport): set of Flight
+	function flightsFromAirport(airport:Airport): set of Flight // SPEC [9]
 		^= those f::flights.ran :- f.route.x = airport;
 		
 	build{!pilots:set of Pilot, !aircraft:set of Aircraft}

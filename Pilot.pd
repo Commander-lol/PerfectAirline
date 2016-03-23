@@ -11,7 +11,7 @@ abstract
 		id : string,
 		flyables : set of Aircraft;
 	invariant
-		#flyables > 0, // NOT ASSUMPTION: Pilots must be able to fly at least one type of plane
+		#flyables > 0, // Pilots must be able to fly at least one type of plane
 		Util isAlpha(id); // ASSUMPTION: IDs are unique alphanumeric strings
 interface
 	function
